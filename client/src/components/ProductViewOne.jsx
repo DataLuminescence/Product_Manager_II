@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import axios from "axios"
 import { useParams } from 'react-router-dom'
 
-const ViewOne = () => {
+const ProductViewOne = () => {
     const {id} = useParams()
     const [product, setProduct] = useState()
 
@@ -10,8 +10,7 @@ const ViewOne = () => {
         axios.get(`http://localhost:8000/api/products/${id}`)
             .then(response=>setProduct(response.data))
             .catch(err=>console.log(err))
-    },[])
-
+    })
 
     return (
         <fieldset>
@@ -24,9 +23,8 @@ const ViewOne = () => {
                     <h3> Description: {product.description} </h3>
                 </div>
             }
-            
         </fieldset>
     )
 }
 
-export default ViewOne
+export default ProductViewOne

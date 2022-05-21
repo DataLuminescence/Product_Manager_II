@@ -1,34 +1,44 @@
 // Import dependencies
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useParams, useNavigate } from 'react-router-dom';
 
-const ProductForm = (props) => {
+const ProductUpdateOne = () => {
 
-    // Sets title, price and description values to form data
-    const [title, setTitle] = useState("");
-    const [price, setPrice] = useState(0);
-    const [description, setDescription] = useState("");
+    // Get data to set form prepopulated data
+    const {id} = useParams()
+
+    // Used to update title price and description if user updates forms
+    const [title, setTitle] = useState();
+    const [price, setPrice] = useState();
+    const [description, setDescription] = useState();
+
+    // used to redirect to the home page
+    const navigate = useNavigate();
 
     // Set the errors to display to the user
     const [errors, setErrors] = useState([]);
 
-    // Deconstruct to use prop data more easily
-    const {reloadList} = props
+    useEffect(()=>{
+        axios.get(`http://localhost:8000/api/products/${id}`)
+            .then(response=>{
+                const product = response.data
+                setTitle(product.title)
+                setPrice(product.price)
+                setDescription(product.description)
+            })
+            .catch(err=>console.log(err))
+    },[id])
 
-    // Sends data collected from the form to the back end
-    const onSubmitHandler = (e) => {
-        e.preventDefault();
-        axios.post(`http://localhost:8000/api/products`, {
+    const onSubmitHandler = (e) =>{
+        e.preventDefault()
+        axios.put(`http://localhost:8000/api/products/${id}`, {           
             title,
             price,
-            description
-        })
-            //You would put navigate here
-            .then(res => {
-                console.log("Response: ", res)
-                reloadList()
-                clearForm()
-            })
+            description})
+            .then(response => 
+                navigate(`/`)
+            )
             .catch(err => {
                 const errArr = []
                 const errResults = err.response.data.errors
@@ -37,14 +47,7 @@ const ProductForm = (props) => {
                     errArr.push(errResults[key]["message"])
                 }
                 setErrors(errArr)
-            })
-    }
-
-    // Clear default values for title, price, and description
-    const clearForm = () =>{
-        setTitle("")
-        setPrice(0)
-        setDescription("")
+        })
     }
 
     // Forms to create new product with title, price and description as data
@@ -67,7 +70,7 @@ const ProductForm = (props) => {
                     <input type="text" name="description" value={description}
                     onChange={e => setDescription(e.target.value)}></input>
                 </p>
-                <button style={{ width: 100 }}>Create</button>
+                <button style={{ width: 100 }}>Update Product</button>
             </form>
             {
                 // Loop through errors to provide user with messages on how to correct errors in forms
@@ -77,7 +80,6 @@ const ProductForm = (props) => {
             }
         </div>
     )
-
 }
 
-export default ProductForm
+export default ProductUpdateOne
